@@ -30,27 +30,41 @@ export function Home() {
 
   async function loadData() {
     const dataKey = '@savepass:logins';
+    const storedData = await AsyncStorage.getItem(dataKey);
+    const parsedStoredData = JSON.parse(storedData);
+    setData(parsedStoredData);
+    setSearchListData(parsedStoredData);
     // Get asyncStorage data, use setSearchListData and setData
   }
 
   function handleFilterLoginData() {
+    if (searchText !== '') {
+      setSearchListData(
+        data.filter(login => login.service_name === searchText)
+      );
+    } else {
+      setSearchListData(data);
+    }
+
     // Filter results inside data, save with setSearchListData
   }
 
   function handleChangeInputText(text: string) {
-    // Update searchText value
+    setSearchText(text);
   }
 
-  useFocusEffect(useCallback(() => {
-    loadData();
-  }, []));
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   return (
     <>
       <Header
         user={{
           name: 'Rocketseat',
-          avatar_url: 'https://i.ibb.co/ZmFHZDM/rocketseat.jpg'
+          avatar_url: 'https://i.ibb.co/ZmFHZDM/rocketseat.jpg',
         }}
       />
       <Container>
@@ -60,7 +74,6 @@ export function Home() {
           value={searchText}
           returnKeyType="search"
           onSubmitEditing={handleFilterLoginData}
-
           onSearchButtonPress={handleFilterLoginData}
         />
 
@@ -69,23 +82,24 @@ export function Home() {
           <TotalPassCount>
             {searchListData.length
               ? `${`${searchListData.length}`.padStart(2, '0')} ao total`
-              : 'Nada a ser exibido'
-            }
+              : 'Nada a ser exibido'}
           </TotalPassCount>
         </Metadata>
 
         <LoginList
-          keyExtractor={(item) => item.id}
+          keyExtractor={item => item.id}
           data={searchListData}
           renderItem={({ item: loginData }) => {
-            return <LoginDataItem
-              service_name={loginData.service_name}
-              email={loginData.email}
-              password={loginData.password}
-            />
+            return (
+              <LoginDataItem
+                service_name={loginData.service_name}
+                email={loginData.email}
+                password={loginData.password}
+              />
+            );
           }}
         />
       </Container>
     </>
-  )
+  );
 }
